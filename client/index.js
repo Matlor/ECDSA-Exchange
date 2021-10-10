@@ -1,34 +1,59 @@
-import "./index.scss";
+import './index.scss';
 
-const server = "http://localhost:3042";
+// import EC library
+var EC = require('elliptic').ec;
+var ec = new EC('secp256k1');
 
-document.getElementById("exchange-address").addEventListener('input', ({ target: {value} }) => {
-  if(value === "") {
-    document.getElementById("balance").innerHTML = 0;
-    return;
-  }
+const server = 'http://localhost:3042';
 
-  fetch(`${server}/balance/${value}`).then((response) => {
-    return response.json();
-  }).then(({ balance }) => {
-    document.getElementById("balance").innerHTML = balance;
-  });
-});
+document
+	.getElementById('exchange-address')
+	.addEventListener('input', ({ target: { value } }) => {
+		if (value === '') {
+			document.getElementById('balance').innerHTML = 0;
+			return;
+		}
 
-document.getElementById("transfer-amount").addEventListener('click', () => {
-  const sender = document.getElementById("exchange-address").value;
-  const amount = document.getElementById("send-amount").value;
-  const recipient = document.getElementById("recipient").value;
+		fetch(`${server}/balance/${value}`)
+			.then((response) => {
+				return response.json();
+			})
+			.then(({ balance }) => {
+				document.getElementById('balance').innerHTML = balance;
+			});
+	});
 
-  const body = JSON.stringify({
-    sender, amount, recipient
-  });
+document.getElementById('transfer-amount').addEventListener('click', () => {
+	// sender
+	const sender = document.getElementById('exchange-address').value;
 
-  const request = new Request(`${server}/send`, { method: 'POST', body });
+	// msg
+	const amount = document.getElementById('send-amount').value;
+	const recipient = document.getElementById('recipient').value;
 
-  fetch(request, { headers: { 'Content-Type': 'application/json' }}).then(response => {
-    return response.json();
-  }).then(({ balance }) => {
-    document.getElementById("balance").innerHTML = balance;
-  });
+	const msg = {
+		amount: amount,
+		recipient: recipient,
+	};
+
+	// signature
+	const signature = 'this will be signature';
+
+	const body = JSON.stringify({
+		sender,
+		msg,
+		signature,
+	});
+
+	console.log(body, 'kjfdbvfkbjk');
+
+	const request = new Request(`${server}/send`, { method: 'POST', body });
+
+	fetch(request, { headers: { 'Content-Type': 'application/json' } })
+		.then((response) => {
+			return response.json();
+		})
+		.then(({ balance }) => {
+			document.getElementById('balance').innerHTML = balance;
+		});
 });
